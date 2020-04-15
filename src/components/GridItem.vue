@@ -40,6 +40,7 @@
     .vue-grid-item.vue-draggable-dragging {
         transition:none;
         z-index: 3;
+        opacity: 0.2;
     }
 
     .vue-grid-item.vue-grid-placeholder {

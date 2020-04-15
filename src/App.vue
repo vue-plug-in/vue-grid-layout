@@ -45,6 +45,7 @@
                     :vertical-compact="true"
                     :use-css-transforms="true"
                     :responsive="responsive"
+                    :margin="[0, 0]"
                     @layout-created="layoutCreatedEvent"
                     @layout-before-mount="layoutBeforeMountEvent"
                     @layout-mounted="layoutMountedEvent"
@@ -146,7 +147,7 @@
                 resizable: true,
                 mirrored: false,
                 responsive: true,
-                preventCollision: false,
+                preventCollision: true,
                 rowHeight: 30,
                 colNum: 12,
                 index: 0
