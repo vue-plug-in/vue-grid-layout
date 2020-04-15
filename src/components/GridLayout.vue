@@ -285,7 +285,7 @@
                 return bottom(this.layout) * (this.rowHeight + this.margin[1]) + this.margin[1] + 'px';
             },
             dragEvent: function (eventName, id, x, y, h, w) {
-                //console.log(eventName + " id=" + id + ", x=" + x + ", y=" + y);
+                console.log(eventName + " id=" + id + ", x=" + x + ", y=" + y);
                 let l = getLayoutItem(this.layout, id);
                 //GetLayoutItem sometimes returns null object
                 if (l === undefined || l === null){

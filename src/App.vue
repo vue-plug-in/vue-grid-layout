@@ -54,6 +54,7 @@
             >
                 <grid-item v-for="item in layout" :key="item.i"
                            :static="item.static"
+                           :nativeDrag="true"
                            :x="item.x"
                            :y="item.y"
                            :w="item.w"
@@ -143,7 +144,7 @@
             return {
                 layout: JSON.parse(JSON.stringify(testLayout)),
                 layout2: JSON.parse(JSON.stringify(testLayout)),
-                draggable: true,
+                draggable: false,
                 resizable: true,
                 mirrored: false,
                 responsive: true,

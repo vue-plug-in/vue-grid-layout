@@ -3,6 +3,7 @@
          class="vue-grid-item"
          :class="classObj"
          :style="style"
+         :draggable="nativeDrag"
     >
         <slot></slot>
         <span v-if="resizableAndNotStatic" ref="handle" :class="resizableHandleClass"></span>
@@ -134,6 +135,11 @@
              },
              */
             static: {
+                type: Boolean,
+                required: false,
+                default: false
+            },
+            nativeDrag: {
                 type: Boolean,
                 required: false,
                 default: false
@@ -414,6 +420,9 @@
             }
         },
         methods: {
+            mousemove() {
+                console.log(this.i);
+            },
             createStyle: function () {
                 if (this.x + this.w > this.cols) {
                     this.innerX = 0;
