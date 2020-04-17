@@ -11,6 +11,7 @@
     @dragend="handlerDragend"
   >
     <slot></slot>
+    <div class="vue-grid-item-placeholder" :class="placeholderClass"></div>
     <div ref="image" :style="hideImageStyle" :transfer-data="scopedData">□</div>
     <span v-if="resizableAndNotStatic" ref="handle" :class="resizableHandleClass"></span>
     <!--<span v-if="draggable" ref="dragHandle" class="vue-draggable-handle"></span>-->
@@ -21,6 +22,40 @@
     transition: all 200ms ease;
     transition-property: left, top, right;
     /* add right for rtl */
+  }
+
+  .vue-grid-item-placeholder {
+    position: absolute;
+    background-color: red;
+    opacity: 0.3;
+    width: 0;
+    height: 0;
+    transition: all 200ms ease;
+    transition-property: left, top, right;
+  }
+  .vue-grid-item-placeholder.center {
+    width: 100%;
+    height: 100%;
+  }
+  .vue-grid-item-placeholder.top {
+    top: 0;
+    width: 100%;
+    height: 50%;
+  }
+  .vue-grid-item-placeholder.bottom {
+    bottom: 0;
+    width: 100%;
+    height: 50%;
+  }
+  .vue-grid-item-placeholder.left {
+    left: 0;
+    width: 50%;
+    height: 100%;
+  }
+  .vue-grid-item-placeholder.right {
+    right: 0;
+    width: 50%;
+    height: 100%;
   }
 
   .vue-grid-item.no-touch {
@@ -54,7 +89,7 @@
     background: red;
     opacity: 0.2;
     transition-duration: 100ms;
-    z-index: -1;
+    z-index: 2;
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
@@ -245,6 +280,7 @@
         innerY: this.y,
         innerW: this.w,
         innerH: this.h,
+        placeholderClass: '',
       }
     },
     created () {
@@ -439,12 +475,14 @@
       handlerDrop () {
         if (this.isPlaceholder) return
         // console.log('handlerDrop');
+        this.placeholderClass = ''
       },
       handlerDragend () {
         if (this.isPlaceholder) return
 
         transferDataStore.data = undefined;
         console.log('dragend');
+        this.placeholderClass = ''
         this.eventBus.$emit("native-drag", { eventName: 'dragend' });
       },
       handlerDragover (e) {
@@ -452,6 +490,7 @@
 
         const { i } = transferDataStore.data
         if (i !== this.i) {
+          this.placeholderClass = this.judgeDragPostion(e)
           this.eventBus.$emit("native-drag", { eventName: 'dragover', pos: this.judgeDragPostion(e), i: this.i, x: this.x, y: this.y, h: this.h, w: this.w });
         }
       },

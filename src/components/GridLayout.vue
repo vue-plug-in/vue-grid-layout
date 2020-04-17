@@ -252,58 +252,58 @@
     },
     methods: {
       nativeDrag (params) {
-        let { eventName, pos, i, x, y, h, w } = params
-        let placeholderX, placeholderY, placeholderW, placeholderH
-        console.log(params);
-        if (eventName === 'dragover') {
-          switch (pos) {
-            case 'center':
-              placeholderX = x
-              placeholderY = y
-              placeholderW = w
-              placeholderH = h
-              break;
-            case 'top':
-              placeholderX = x
-              placeholderY = y
-              placeholderW = w
-              placeholderH = h / 2
-              break;
-            case 'bottom':
-              placeholderX = x
-              placeholderY = y + h / 2
-              placeholderW = w
-              placeholderH = h / 2
-              break;
-            case 'left':
-              placeholderX = x
-              placeholderY = y
-              placeholderW = w / 2
-              placeholderH = h
-              break;
-            case 'right':
-              placeholderX = x + w / 2
-              placeholderY = y
-              placeholderW = w / 2
-              placeholderH = h
-              break;
-            default:
-              break;
-          }
-          this.placeholder.i = i;
-          this.placeholder.x = placeholderX;
-          this.placeholder.y = placeholderY;
-          this.placeholder.w = placeholderW;
-          this.placeholder.h = placeholderH;
-          this.$nextTick(function () {
-            this.isDragging = true;
-          });
-        } else if (eventName === 'dragend') {
-            console.log('dragend');
-          this.$nextTick(function () {
-            this.isDragging = false;
-          });
-        }
+        // let { eventName, pos, i, x, y, h, w } = params
+        // let placeholderX, placeholderY, placeholderW, placeholderH
+        // console.log(params);
+        // if (eventName === 'dragover') {
+        //   switch (pos) {
+        //     case 'center':
+        //       placeholderX = x
+        //       placeholderY = y
+        //       placeholderW = w
+        //       placeholderH = h
+        //       break;
+        //     case 'top':
+        //       placeholderX = x
+        //       placeholderY = y
+        //       placeholderW = w
+        //       placeholderH = h / 2
+        //       break;
+        //     case 'bottom':
+        //       placeholderX = x
+        //       placeholderY = y + h / 2
+        //       placeholderW = w
+        //       placeholderH = h / 2
+        //       break;
+        //     case 'left':
+        //       placeholderX = x
+        //       placeholderY = y
+        //       placeholderW = w / 2
+        //       placeholderH = h
+        //       break;
+        //     case 'right':
+        //       placeholderX = x + w / 2
+        //       placeholderY = y
+        //       placeholderW = w / 2
+        //       placeholderH = h
+        //       break;
+        //     default:
+        //       break;
+        //   }
+        //   this.placeholder.i = i;
+        //   this.placeholder.x = placeholderX;
+        //   this.placeholder.y = placeholderY;
+        //   this.placeholder.w = placeholderW;
+        //   this.placeholder.h = placeholderH;
+        //   this.$nextTick(function () {
+        //     this.isDragging = true;
+        //   });
+        // } else if (eventName === 'dragend') {
+        //     console.log('dragend');
+        //   this.$nextTick(function () {
+        //     this.isDragging = false;
+        //   });
+        // }
 
       },
       layoutUpdate () {
