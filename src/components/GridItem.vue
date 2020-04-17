@@ -8,6 +8,7 @@
     @dragstart="handlerDragstart"
     @dragover.prevent="handlerDragover"
     @drop.prevent="handlerDrop"
+    @dragleave.self="handlerDragleave"
     @dragend="handlerDragend"
   >
     <slot></slot>
@@ -467,6 +468,9 @@
       }
     },
     methods: {
+      handlerDragleave () {
+        console.log('handlerDragleave', this.i);
+      },
       handlerDrop () {
         // console.log('handlerDrop');
         this.placeholderClass = ''
