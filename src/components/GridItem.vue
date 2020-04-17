@@ -240,11 +240,6 @@
         required: false,
         default: 'a, button'
       },
-      isPlaceholder: {
-        type: Boolean,
-        required: false,
-        default: false
-      },
     },
     inject: ["eventBus"],
     data: function () {
@@ -473,21 +468,16 @@
     },
     methods: {
       handlerDrop () {
-        if (this.isPlaceholder) return
         // console.log('handlerDrop');
         this.placeholderClass = ''
       },
       handlerDragend () {
-        if (this.isPlaceholder) return
-
         transferDataStore.data = undefined;
         console.log('dragend');
         this.placeholderClass = ''
         this.eventBus.$emit("native-drag", { eventName: 'dragend' });
       },
       handlerDragover (e) {
-        if (this.isPlaceholder) return
-
         const { i } = transferDataStore.data
         if (i !== this.i) {
           this.placeholderClass = this.judgeDragPostion(e)
@@ -495,8 +485,6 @@
         }
       },
       handlerDragstart (e) {
-        if (this.isPlaceholder) return
-
         const transfer = e.dataTransfer;
         transferDataStore.data = this.scopedData;
         if (transfer.setDragImage) {

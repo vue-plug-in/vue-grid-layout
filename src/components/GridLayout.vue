@@ -9,7 +9,6 @@
       :w="placeholder.w"
       :h="placeholder.h"
       :i="placeholder.i"
-      :isPlaceholder="true"
     ></grid-item>
   </div>
 </template>
