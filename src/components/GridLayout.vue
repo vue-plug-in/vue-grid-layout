@@ -22,7 +22,7 @@
   import Vue from 'vue';
   var elementResizeDetectorMaker = require("element-resize-detector");
 
-  import { bottom, compact, getLayoutItem, moveElement, validateLayout, cloneLayout, getAllCollisions } from '../helpers/utils';
+  import { bottom, compact, getLayoutItem, getMousePlaceholder, moveElement, validateLayout, cloneLayout, getAllCollisions } from '../helpers/utils';
   import { getBreakpointFromWidth, getColsFromBreakpoint, findOrGenerateResponsiveLayout } from "../helpers/responsiveUtils";
   //var eventBus = require('./eventBus');
 
@@ -130,8 +130,8 @@
         self.resizeEvent(eventType, i, x, y, h, w);
       };
 
-      self.dragEventHandler = function (eventType, i, x, y, h, w) {
-        self.dragEvent(eventType, i, x, y, h, w);
+      self.dragEventHandler = function (params) {
+        self.dragEvent(params);
       };
 
       self.nativeDragHandler = function (params) {
@@ -348,13 +348,15 @@
         if (!this.autoSize) return;
         return bottom(this.layout) * (this.rowHeight + this.margin[1]) + this.margin[1] + 'px';
       },
-      dragEvent: function (eventName, id, x, y, h, w) {
-        console.log(eventName + " id=" + id + ", x=" + x + ", y=" + y);
+      dragEvent: function ({ eventName, id, x, y, h, w, mousePos }) {
+
         let l = getLayoutItem(this.layout, id);
-        //GetLayoutItem sometimes returns null object
         if (l === undefined || l === null) {
           l = { x: 0, y: 0 }
         }
+
+        let mousePlaceholder = getMousePlaceholder(this.layout, mousePos, id)
+
 
         if (eventName === "dragmove" || eventName === "dragstart") {
           this.placeholder.i = id;
@@ -362,10 +364,18 @@
           this.placeholder.y = l.y;
           this.placeholder.w = w;
           this.placeholder.h = h;
+
+          if (mousePlaceholder) {
+            const { x, y, w, h, i } = mousePlaceholder
+            this.placeholder.i = i;
+            this.placeholder.x = x;
+            this.placeholder.y = y;
+            this.placeholder.w = w;
+            this.placeholder.h = h;
+          }
           this.$nextTick(function () {
             this.isDragging = true;
           });
-          //this.$broadcast("updateWidth", this.width);
           this.eventBus.$emit("updateWidth", this.width);
         } else {
           this.$nextTick(function () {
@@ -373,10 +383,8 @@
           });
         }
 
-        // Move the element to the dragged location.
         this.layout = moveElement(this.layout, l, x, y, true, this.preventCollision);
         compact(this.layout, this.verticalCompact);
-        // needed because vue can't detect changes on array element properties
         this.eventBus.$emit("compact");
         this.updateHeight();
         if (eventName === 'dragend') this.$emit('layout-updated', this.layout);

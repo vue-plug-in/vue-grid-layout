@@ -434,7 +434,7 @@
       scopedData () {
         return { x: this.x, y: this.y, w: this.w, h: this.h, i: this.i }
       },
-      hideImageStyle: () => ({ position: 'fixed', top: '-1000px', opacity: 0.5 }),
+      hideImageStyle: () => ({ position: 'fixed', left: '-10000px', opacity: 0.5 }),
       classObj () {
         return {
           'vue-resizable': this.resizableAndNotStatic,
@@ -739,13 +739,15 @@
             break;
           }
         }
-
         // Get new XY
         let pos;
+        let mousePos
         if (this.renderRtl) {
           pos = this.calcXY(newPosition.top, newPosition.left);
+          mousePos = this.calcOriginXY(y, x);
         } else {
           pos = this.calcXY(newPosition.top, newPosition.left);
+          mousePos = this.calcOriginXY(y, x);
         }
 
         this.lastX = x;
@@ -757,7 +759,7 @@
         if (event.type === "dragend" && (this.previousX !== this.innerX || this.previousY !== this.innerY)) {
           this.$emit("moved", this.i, pos.x, pos.y);
         }
-        this.eventBus.$emit("dragEvent", event.type, this.i, pos.x, pos.y, this.innerH, this.innerW);
+        this.eventBus.$emit("dragEvent", { eventName: event.type, id: this.i, x: pos.x, y: pos.y, h: this.innerH, w: this.innerW, mousePos });
       },
       calcPosition: function (x, y, w, h) {
         const colWidth = this.calcColWidth();
@@ -811,6 +813,16 @@
         // Capping
         x = Math.max(Math.min(x, this.cols - this.innerW), 0);
         y = Math.max(Math.min(y, this.maxRows - this.innerH), 0);
+
+        return { x, y };
+      },
+      calcOriginXY (top, left) {
+        const colWidth = this.calcColWidth();
+        let x = ((left - this.margin[0]) / (colWidth + this.margin[0])).toFixed(1);
+        let y = ((top - this.margin[1]) / (this.rowHeight + this.margin[1])).toFixed(1);
+
+        x = Math.max(x, 0);
+        y = Math.max(y, 0);
 
         return { x, y };
       },
