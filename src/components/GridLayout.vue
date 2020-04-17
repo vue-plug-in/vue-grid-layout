@@ -22,7 +22,7 @@
   import Vue from 'vue';
   var elementResizeDetectorMaker = require("element-resize-detector");
 
-  import { bottom, compact, getLayoutItem, getMousePlaceholder, moveElement, validateLayout, cloneLayout, getAllCollisions } from '../helpers/utils';
+  import { bottom, compact, getLayoutItem, getMousePlaceholder, dropElement, moveElement, validateLayout, cloneLayout, getAllCollisions } from '../helpers/utils';
   import { getBreakpointFromWidth, getColsFromBreakpoint, findOrGenerateResponsiveLayout } from "../helpers/responsiveUtils";
   //var eventBus = require('./eventBus');
 
@@ -355,7 +355,6 @@
           l = { x: 0, y: 0 }
         }
 
-        let mousePlaceholder = getMousePlaceholder(this.layout, mousePos, id)
 
 
         if (eventName === "dragmove" || eventName === "dragstart") {
@@ -365,6 +364,7 @@
           this.placeholder.w = w;
           this.placeholder.h = h;
 
+          let mousePlaceholder = getMousePlaceholder(this.layout, mousePos, id)
           if (mousePlaceholder) {
             const { x, y, w, h, i } = mousePlaceholder
             this.placeholder.i = i;
@@ -380,14 +380,24 @@
         } else {
           this.$nextTick(function () {
             this.isDragging = false;
+            // let mousePlaceholder = getMousePlaceholder(this.layout, mousePos, id)
+            // const layout = dropElement(this.layout, l, mousePlaceholder);
+            // dropElement(this.layout, l, mousePlaceholder);
+            // this.$emit('update:layout', layout);
           });
         }
 
         this.layout = moveElement(this.layout, l, x, y, true, this.preventCollision);
-        compact(this.layout, this.verticalCompact);
+        // compact(this.layout, this.verticalCompact);
         this.eventBus.$emit("compact");
         this.updateHeight();
-        if (eventName === 'dragend') this.$emit('layout-updated', this.layout);
+        if (eventName === 'dragend') {
+          //   let mousePlaceholder = getMousePlaceholder(this.layout, mousePos, id)
+          //   const layout = dropElement(this.layout, l, mousePlaceholder);
+          // dropElement(this.layout, l, mousePlaceholder);
+          // this.$emit('update:layout', layout);
+          this.$emit('layout-updated', this.layout);
+        }
       },
       resizeEvent: function (eventName, id, x, y, h, w) {
         let l = getLayoutItem(this.layout, id);

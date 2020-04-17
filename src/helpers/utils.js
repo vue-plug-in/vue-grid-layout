@@ -82,6 +82,29 @@ export function collides(l1: LayoutItem, l2: LayoutItem): boolean {
 }
 
 /**
+ * 比较两个l的边是否完全重合
+ */
+export function borderFit(l1, l2) {
+  if (l1 === l2) return false; // same element
+  // border-top
+  if (l1.y === l2.y + l2.h && l1.w === l2.w && l1.x === l2.x) {
+    return "top";
+  }
+  // border-bottom
+  if (l1.y + l1.h === l2.y && l1.w === l2.w && l1.x === l2.x) {
+    return "bottom";
+  }
+  // border-left
+  if (l1.x === l2.x + l2.w && l1.h === l2.h && l1.y === l2.y) {
+    return "left";
+  }
+  // border-right
+  if (l1.x + l1.w === l2.x && l1.h === l2.h && l1.y === l2.y) {
+    return "right";
+  }
+}
+
+/**
  * Given a layout, compact it. This involves going down each y coordinate and removing gaps
  * between items.
  *
@@ -745,4 +768,111 @@ export function getMousePlaceholder(layout, mousePos, id) {
       break;
     }
   }
+}
+
+// 获取和当前块边完全对齐的块(中的最小面积块)
+export function getAlignItem(layout, l) {
+  // borderFit
+  let items = [];
+  for (let idx = 0, len = layout.length; idx < len; idx++) {
+    const pos = borderFit(l, layout[idx]);
+    if (pos) {
+      items.push({
+        pos,
+        item: layout[idx],
+        area: layout[idx].w * layout[idx].h,
+      });
+    }
+  }
+  return items.sort((a, b) => a.area - b.area)[0];
+}
+
+// dropElement
+export function dropElement(layout, l, mousePlaceholder) {
+  if (!mousePlaceholder) return;
+  let copyLayout = cloneLayout(layout);
+  // 最小贴合块填补空位
+  const { pos, item: alignItem } = getAlignItem(layout, l);
+  console.log(pos, alignItem);
+  const index = copyLayout.findIndex((item) => item.i === alignItem.i);
+  switch (pos) {
+    case "top":
+      copyLayout[index].h += alignItem.h;
+      break;
+    case "bottom":
+      copyLayout[index].h += alignItem.h;
+      copyLayout[index].y -= alignItem.h;
+      break;
+    case "left":
+      copyLayout[index].w += alignItem.w;
+      break;
+    case "right":
+      copyLayout[index].w += alignItem.w;
+      copyLayout[index].x -= alignItem.w;
+      break;
+  }
+
+  // drop块和drag块合并或者换位 TODO cpu100%
+  // const dropIndex = copyLayout.findIndex((item) => item.i === mousePlaceholder.i); // drop
+  // const dragIndex = l.i; // drag
+  // const { x: dropX, y: dropY, h: dropH, w: dropW } = copyLayout[dropIndex];
+  // switch (mousePlaceholder.pos) {
+  //   case "top":
+  //     copyLayout[dragIndex] = {
+  //       ...copyLayout[dragIndex],
+  //       x: dropX,
+  //       y: dropY,
+  //       w: dropW,
+  //       h: dropH / 2,
+  //     };
+  //     copyLayout[dropIndex] = {
+  //       ...copyLayout[dropIndex],
+  //       y: dropY + dropH / 2,
+  //       h: dropH / 2,
+  //     };
+  //     break;
+  //   case "bottom":
+  //     copyLayout[dragIndex] = {
+  //       ...copyLayout[dragIndex],
+  //       x: dropX,
+  //       y: dropY + dropH / 2,
+  //       w: dropW,
+  //       h: dropH / 2,
+  //     };
+  //     copyLayout[dropIndex] = {
+  //       ...copyLayout[dropIndex],
+  //       h: dropH / 2,
+  //     };
+  //     break;
+  //   case "left":
+  //     copyLayout[dragIndex] = {
+  //       ...copyLayout[dragIndex],
+  //       x: dropX,
+  //       y: dropY,
+  //       h: dropH,
+  //       w: dropW / 2,
+  //     };
+  //     copyLayout[dropIndex] = {
+  //       ...copyLayout[dropIndex],
+  //       x: dropX - dropW / 2,
+  //       w: dropW / 2,
+  //     };
+  //     break;
+  //   case "right":
+  //     copyLayout[dragIndex] = {
+  //       ...copyLayout[dragIndex],
+  //       x: dropX - dropW / 2,
+  //       y: dropY,
+  //       h: dropH,
+  //       w: dropW / 2,
+  //     };
+  //     copyLayout[dropIndex] = {
+  //       w: dropW / 2,
+  //     };
+  //     break;
+  //   case "center":
+  //     copyLayout[index].w += alignItem.w;
+  //     break;
+  // }
+  return copyLayout;
 }
