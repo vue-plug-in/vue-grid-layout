@@ -105,6 +105,18 @@ export function borderFit(l1, l2) {
 }
 
 /**
+ * 交换l位置
+ */
+export function exchangeLayout(layout, l1, l2) {
+  const l1Idx = layout.findIndex((item) => item.i === l1.i);
+  const l2Idx = layout.findIndex((item) => item.i === l2.i);
+  const temp = l1;
+  layout[l1Idx] = { ...l2, w: l1.w, h: l1.h, x: l1.x, y: l1.y };
+  layout[l2Idx] = { ...temp, w: l2.w, h: l2.h, x: l2.x, y: l2.y };
+  return layout;
+}
+
+/**
  * Given a layout, compact it. This involves going down each y coordinate and removing gaps
  * between items.
  *
@@ -678,7 +690,7 @@ export function judgeDragPostion({ w, h, x, y, l }) {
       if (y >= h - (h / w) * x) {
         return "right";
       } else {
-        return "bottom"
+        return "bottom";
       }
     } else {
       if (y >= h - (h / w) * x) {
@@ -763,6 +775,7 @@ export function getPlaceholderPostion(pos, item) {
     w,
     h,
     i: item.i,
+    dropItem: item,
     pos,
   };
 }
@@ -780,7 +793,7 @@ export function getMousePlaceholder(layout, mousePos, l) {
           h,
           x: delX,
           y: delY,
-          l
+          l,
         });
         return getPlaceholderPostion(pos, layout[idx]);
       }
@@ -811,6 +824,15 @@ export function getAlignItem(layout, l) {
 export function dropElement(layout, l, mousePlaceholder) {
   if (!mousePlaceholder) return layout;
   let copyLayout = cloneLayout(layout);
+  switch (mousePlaceholder.pos) {
+    case "center":
+      // 换位
+      exchangeLayout(copyLayout, l, mousePlaceholder.dropItem);
+      break;
+
+    default:
+      break;
+  }
   // // 最小贴合块填补空位
   // const { pos, item: alignItem } = getAlignItem(layout, l);
   // console.log(pos, alignItem);

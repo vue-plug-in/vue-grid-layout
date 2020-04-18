@@ -108,7 +108,7 @@
     //var eventBus = require('./eventBus');
 
     let testLayout = [
-        {"x":0,"y":0,"w":2,"h":2,"i":"0", resizable: true, draggable: true, static: false},
+        {"x":0,"y":0,"w":1,"h":2,"i":"0", resizable: true, draggable: true, static: false},
         {"x":2,"y":0,"w":2,"h":4,"i":"1", resizable: null, draggable: null, static: false},
         {"x":4,"y":0,"w":2,"h":5,"i":"2", resizable: false, draggable: false, static: false},
         {"x":6,"y":0,"w":2,"h":3,"i":"3", resizable: false, draggable: false, static: false},
@@ -155,6 +155,13 @@
         },
         mounted: function () {
             this.index = this.layout.length;
+            // setTimeout(() => {
+            //     this.layout[4] = {
+            //         ...this.layout[4],
+            //         x:6, y: 0,  w: 2, h: 3
+            //     }
+            //     this.layout.push()
+            // }, 5000);
         },
         methods: {
             clicked: function() {
