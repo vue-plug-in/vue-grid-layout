@@ -82,41 +82,6 @@ export function collides(l1: LayoutItem, l2: LayoutItem): boolean {
 }
 
 /**
- * 比较两个l的边是否完全重合
- */
-export function borderFit(l1, l2) {
-  if (l1 === l2) return false; // same element
-  // border-top
-  if (l1.y === l2.y + l2.h && l1.w === l2.w && l1.x === l2.x) {
-    return "top";
-  }
-  // border-bottom
-  if (l1.y + l1.h === l2.y && l1.w === l2.w && l1.x === l2.x) {
-    return "bottom";
-  }
-  // border-left
-  if (l1.x === l2.x + l2.w && l1.h === l2.h && l1.y === l2.y) {
-    return "left";
-  }
-  // border-right
-  if (l1.x + l1.w === l2.x && l1.h === l2.h && l1.y === l2.y) {
-    return "right";
-  }
-}
-
-/**
- * 交换l位置
- */
-export function exchangeLayout(layout, l1, l2) {
-  const l1Idx = layout.findIndex((item) => item.i === l1.i);
-  const l2Idx = layout.findIndex((item) => item.i === l2.i);
-  const temp = l1;
-  layout[l1Idx] = { ...l2, w: l1.w, h: l1.h, x: l1.x, y: l1.y };
-  layout[l2Idx] = { ...temp, w: l2.w, h: l2.h, x: l2.x, y: l2.y };
-  return layout;
-}
-
-/**
  * Given a layout, compact it. This involves going down each y coordinate and removing gaps
  * between items.
  *
@@ -676,6 +641,42 @@ export function findAndRemove(array, property, value) {
   });
 }
 
+/**
+ * 比较两个l的边是否完全重合
+ */
+function borderFit(l1, l2) {
+  if (l1 === l2) return false; // same element
+  // border-top
+  if (l1.y === l2.y + l2.h && l1.w === l2.w && l1.x === l2.x) {
+    return "top";
+  }
+  // border-bottom
+  if (l1.y + l1.h === l2.y && l1.w === l2.w && l1.x === l2.x) {
+    return "bottom";
+  }
+  // border-left
+  if (l1.x === l2.x + l2.w && l1.h === l2.h && l1.y === l2.y) {
+    return "left";
+  }
+  // border-right
+  if (l1.x + l1.w === l2.x && l1.h === l2.h && l1.y === l2.y) {
+    return "right";
+  }
+}
+
+/**
+ * 交换l位置
+ */
+function exchangeLayout(layout, l1, l2) {
+  const l1Idx = layout.findIndex((item) => item.i === l1.i);
+  const l2Idx = layout.findIndex((item) => item.i === l2.i);
+  const temp = l1;
+  layout[l1Idx] = { ...l2, w: l1.w, h: l1.h, x: l1.x, y: l1.y };
+  layout[l2Idx] = { ...temp, w: l2.w, h: l2.h, x: l2.x, y: l2.y };
+  return layout;
+}
+
+
 export function judgeDragPostion({ w, h, x, y, l }) {
   /**
    * @target 判断当前鼠标在drop块的哪个区域（大小形状完全一致上下左右中，不一致上下左右）
@@ -735,7 +736,7 @@ export function judgeDragPostion({ w, h, x, y, l }) {
   }
 }
 
-export function getPlaceholderPostion(pos, item) {
+function getPlaceholderPostion(pos, item) {
   let x, y, w, h;
   switch (pos) {
     case "center":
@@ -768,6 +769,8 @@ export function getPlaceholderPostion(pos, item) {
       w = item.w / 2;
       h = item.h;
       break;
+    default:
+      return undefined;
   }
   return {
     x,
@@ -780,6 +783,17 @@ export function getPlaceholderPostion(pos, item) {
   };
 }
 
+function handlerBoundaryContions(pos, w, h) {
+  if (w > 1 && h > 1) {
+    return pos;
+  } else if (w > 1 && h < 2) {
+    if (!["top", "bottom"].includes(pos)) return pos;
+  } else if (h > 1 && w < 2) {
+    if (!["left", "right"].includes(pos)) return pos;
+  } else {
+    if (pos === 'center') return pos;
+  }
+}
 export function getMousePlaceholder(layout, mousePos, l) {
   for (let idx = 0, len = layout.length; idx < len; idx++) {
     let { x, y, w, h, i } = layout[idx];
@@ -795,7 +809,10 @@ export function getMousePlaceholder(layout, mousePos, l) {
           y: delY,
           l,
         });
-        return getPlaceholderPostion(pos, layout[idx]);
+        return getPlaceholderPostion(
+          handlerBoundaryContions(pos, w, h),
+          layout[idx]
+        );
       }
       // eslint-disable-next-line no-unreachable
       break;
