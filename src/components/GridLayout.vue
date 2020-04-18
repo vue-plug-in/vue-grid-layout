@@ -303,7 +303,7 @@
           this.placeholder.w = w;
           this.placeholder.h = h;
 
-          let mousePlaceholder = getMousePlaceholder(this.layout, mousePos, id)
+          let mousePlaceholder = getMousePlaceholder(this.layout, mousePos, l)
           if (mousePlaceholder) {
             const { x, y, w, h, i } = mousePlaceholder
             this.placeholder.i = i;
@@ -320,9 +320,8 @@
           this.$nextTick(function () {
             this.isDragging = false;
           });
-          let mousePlaceholder = getMousePlaceholder(this.layout, mousePos, id)
+          let mousePlaceholder = getMousePlaceholder(this.layout, mousePos, l)
           const layout = dropElement(this.layout, l, mousePlaceholder);
-        //   dropElement(this.layout, l, mousePlaceholder);
           this.$emit('update:layout', layout);
         }
 
@@ -331,10 +330,6 @@
         this.eventBus.$emit("compact");
         this.updateHeight();
         if (eventName === 'dragend') {
-          //   let mousePlaceholder = getMousePlaceholder(this.layout, mousePos, id)
-          //   const layout = dropElement(this.layout, l, mousePlaceholder);
-          // dropElement(this.layout, l, mousePlaceholder);
-          // this.$emit('update:layout', layout);
           this.$emit('layout-updated', this.layout);
         }
       },

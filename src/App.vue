@@ -146,7 +146,7 @@
                 draggable: true,
                 resizable: true,
                 mirrored: false,
-                responsive: true,
+                responsive: false,
                 preventCollision: true,
                 rowHeight: 30,
                 colNum: 12,

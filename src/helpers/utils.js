@@ -664,14 +664,33 @@ export function findAndRemove(array, property, value) {
   });
 }
 
-export function judgeDragPostion({ w, h, x, y }) {
+export function judgeDragPostion({ w, h, x, y, l }) {
   /**
-   * @target 判断当前鼠标在drop块的哪个区域（上下左右中）
-   * @desc 当前四边形x,y方向各三等分分出上下左右四个梯形和中间一个四边形
-   * @desc 坐标系在左下角 两条对角线y=(h/w)*x,y= h - (h/w)*x
+   * @target 判断当前鼠标在drop块的哪个区域（大小形状完全一致上下左右中，不一致上下左右）
+   * @desc1 当前四边形x,y方向各三等分分出上下左右四个梯形和中间一个四边形，坐标系在左下角 两条对角线y=(h/w)*x,y= h - (h/w)*x
+   * @desc2 对角线切割，分成4个等腰三角形，坐标系在左下角 两条对角线y=(h/w)*x,y= h - (h/w)*x
    */
+
+  //完全一样 上下左右
+  if (w !== l.w || h !== l.h) {
+    if (y <= (h / w) * x) {
+      // 下、右
+      if (y >= h - (h / w) * x) {
+        return "right";
+      } else {
+        return "bottom"
+      }
+    } else {
+      if (y >= h - (h / w) * x) {
+        return "top";
+      } else {
+        return "left";
+      }
+    }
+  }
+
+  // 上下左右中
   // 左1/3区域
-  // console.log({ w, h, x, y });
   if (x < w / 3) {
     if (y <= (h / w) * x) {
       return "bottom";
@@ -748,19 +767,20 @@ export function getPlaceholderPostion(pos, item) {
   };
 }
 
-export function getMousePlaceholder(layout, mousePos, id) {
+export function getMousePlaceholder(layout, mousePos, l) {
   for (let idx = 0, len = layout.length; idx < len; idx++) {
     let { x, y, w, h, i } = layout[idx];
     let { x: x1, y: y1 } = mousePos;
     if (x1 >= x && x1 <= x + w && y1 >= y && y1 <= y + h) {
       let delX = x1 - x;
       let delY = h - (y1 - y);
-      if (id !== i) {
+      if (l.i !== i) {
         const pos = judgeDragPostion({
           w,
           h,
           x: delX,
           y: delY,
+          l
         });
         return getPlaceholderPostion(pos, layout[idx]);
       }
@@ -789,28 +809,28 @@ export function getAlignItem(layout, l) {
 
 // dropElement
 export function dropElement(layout, l, mousePlaceholder) {
-  if (!mousePlaceholder) return;
+  if (!mousePlaceholder) return layout;
   let copyLayout = cloneLayout(layout);
-  // 最小贴合块填补空位
-  const { pos, item: alignItem } = getAlignItem(layout, l);
-  console.log(pos, alignItem);
-  const index = copyLayout.findIndex((item) => item.i === alignItem.i);
-  switch (pos) {
-    case "top":
-      copyLayout[index].h += alignItem.h;
-      break;
-    case "bottom":
-      copyLayout[index].h += alignItem.h;
-      copyLayout[index].y -= alignItem.h;
-      break;
-    case "left":
-      copyLayout[index].w += alignItem.w;
-      break;
-    case "right":
-      copyLayout[index].w += alignItem.w;
-      copyLayout[index].x -= alignItem.w;
-      break;
-  }
+  // // 最小贴合块填补空位
+  // const { pos, item: alignItem } = getAlignItem(layout, l);
+  // console.log(pos, alignItem);
+  // const index = copyLayout.findIndex((item) => item.i === alignItem.i);
+  // switch (pos) {
+  //   case "top":
+  //     copyLayout[index].h += alignItem.h;
+  //     break;
+  //   case "bottom":
+  //     copyLayout[index].h += alignItem.h;
+  //     copyLayout[index].y -= alignItem.h;
+  //     break;
+  //   case "left":
+  //     copyLayout[index].w += alignItem.w;
+  //     break;
+  //   case "right":
+  //     copyLayout[index].w += alignItem.w;
+  //     copyLayout[index].x -= alignItem.w;
+  //     break;
+  // }
 
   // drop块和drag块合并或者换位 TODO cpu100%
   // const dropIndex = copyLayout.findIndex((item) => item.i === mousePlaceholder.i); // drop
