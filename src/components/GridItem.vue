@@ -4,16 +4,8 @@
     class="vue-grid-item"
     :class="classObj"
     :style="style"
-    :draggable="nativeDrag"
-    @dragstart="handlerDragstart"
-    @dragover.prevent="handlerDragover"
-    @drop.prevent="handlerDrop"
-    @dragleave.self="handlerDragleave"
-    @dragend="handlerDragend"
   >
     <slot></slot>
-    <div class="vue-grid-item-placeholder" :class="placeholderClass"></div>
-    <div ref="image" :style="hideImageStyle" :transfer-data="scopedData">□</div>
     <span v-if="resizableAndNotStatic" ref="handle" :class="resizableHandleClass"></span>
     <!--<span v-if="draggable" ref="dragHandle" class="vue-draggable-handle"></span>-->
   </div>
@@ -133,8 +125,6 @@
   import { setTopLeft, setTopRight, setTransformRtl, setTransform } from '../helpers/utils';
   import { getControlPosition, createCoreData } from '../helpers/draggableUtils';
   import { getDocumentDir } from "../helpers/DOM";
-  //    var eventBus = require('./eventBus');
-  import transferDataStore from './transferDataStore';
 
   let interact = require("interactjs");
 
@@ -276,7 +266,6 @@
         innerY: this.y,
         innerW: this.w,
         innerH: this.h,
-        placeholderClass: '',
       }
     },
     created () {
@@ -431,10 +420,6 @@
       }
     },
     computed: {
-      scopedData () {
-        return { x: this.x, y: this.y, w: this.w, h: this.h, i: this.i }
-      },
-      hideImageStyle: () => ({ position: 'fixed', left: '-10000px', opacity: 0.5 }),
       classObj () {
         return {
           'vue-resizable': this.resizableAndNotStatic,
@@ -468,77 +453,6 @@
       }
     },
     methods: {
-      handlerDragleave () {
-        console.log('handlerDragleave', this.i);
-      },
-      handlerDrop () {
-        // console.log('handlerDrop');
-        this.placeholderClass = ''
-      },
-      handlerDragend () {
-        transferDataStore.data = undefined;
-        console.log('dragend');
-        this.placeholderClass = ''
-        this.eventBus.$emit("native-drag", { eventName: 'dragend' });
-      },
-      handlerDragover (e) {
-        const { i } = transferDataStore.data
-        if (i !== this.i) {
-          this.placeholderClass = this.judgeDragPostion(e)
-          this.eventBus.$emit("native-drag", { eventName: 'dragover', pos: this.judgeDragPostion(e), i: this.i, x: this.x, y: this.y, h: this.h, w: this.w });
-        }
-      },
-      handlerDragstart (e) {
-        const transfer = e.dataTransfer;
-        transferDataStore.data = this.scopedData;
-        if (transfer.setDragImage) {
-          transfer.setDragImage(this.$refs.image, 0, 0);
-        }
-      },
-      judgeDragPostion (e) {
-        /**
-        * @target 判断当前鼠标在drop块的哪个区域（上下左右中）
-        * @desc 当前四边形x,y方向各三等分分出上下左右四个梯形和中间一个四边形
-        * @desc 坐标系在左下角 两条对角线y=(h/w)*x,y= h - (h/w)*x
-        */
-        let { x, y } = getControlPosition(e);
-        let { width, height } = this.style
-        let w = parseInt(width)
-        let h = parseInt(height)
-        // 校正y值
-        y = h - y
-        // 左1/3区域
-        if (x < w / 3) {
-          if (y <= (h / w) * x) {
-            return 'bottom'
-          }
-          if (y >= h - (h / w) * x) {
-            return 'top'
-          }
-          return 'left'
-        }
-        // 中1/3区域
-        if (x >= w / 3 && x <= w * 2 / 3) {
-          if (y <= h / 3) {
-            return 'bottom'
-          }
-          if (y >= h * 2 / 3) {
-            return 'top'
-          }
-          return 'center'
-        }
-
-        // 右1/3区域
-        if (x > w * 2 / 3) {
-          if (y >= (h / w) * x) {
-            return 'top'
-          }
-          if (y <= h - (h / w) * x) {
-            return 'bottom'
-          }
-          return 'right'
-        }
-      },
       createStyle: function () {
         if (this.x + this.w > this.cols) {
           this.innerX = 0;

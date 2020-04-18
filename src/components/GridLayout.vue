@@ -134,15 +134,10 @@
         self.dragEvent(params);
       };
 
-      self.nativeDragHandler = function (params) {
-        self.nativeDrag(params);
-      }
-
       self._provided.eventBus = new Vue();
       self.eventBus = self._provided.eventBus;
       self.eventBus.$on('resizeEvent', self.resizeEventHandler);
       self.eventBus.$on('dragEvent', self.dragEventHandler);
-      self.eventBus.$on('native-drag', self.nativeDragHandler);
       self.$emit('layout-created', self.layout);
 
     },
@@ -150,7 +145,6 @@
       //Remove listeners
       this.eventBus.$off('resizeEvent', this.resizeEventHandler);
       this.eventBus.$off('dragEvent', this.dragEventHandler);
-      this.eventBus.$ff('native-drag', this.nativeDragHandler);
       this.eventBus.$destroy();
       removeWindowEventListener("resize", this.onWindowResize);
       this.erd.uninstall(this.$refs.item);
@@ -250,61 +244,6 @@
       },
     },
     methods: {
-      nativeDrag (params) {
-        // let { eventName, pos, i, x, y, h, w } = params
-        // let placeholderX, placeholderY, placeholderW, placeholderH
-        // console.log(params);
-        // if (eventName === 'dragover') {
-        //   switch (pos) {
-        //     case 'center':
-        //       placeholderX = x
-        //       placeholderY = y
-        //       placeholderW = w
-        //       placeholderH = h
-        //       break;
-        //     case 'top':
-        //       placeholderX = x
-        //       placeholderY = y
-        //       placeholderW = w
-        //       placeholderH = h / 2
-        //       break;
-        //     case 'bottom':
-        //       placeholderX = x
-        //       placeholderY = y + h / 2
-        //       placeholderW = w
-        //       placeholderH = h / 2
-        //       break;
-        //     case 'left':
-        //       placeholderX = x
-        //       placeholderY = y
-        //       placeholderW = w / 2
-        //       placeholderH = h
-        //       break;
-        //     case 'right':
-        //       placeholderX = x + w / 2
-        //       placeholderY = y
-        //       placeholderW = w / 2
-        //       placeholderH = h
-        //       break;
-        //     default:
-        //       break;
-        //   }
-        //   this.placeholder.i = i;
-        //   this.placeholder.x = placeholderX;
-        //   this.placeholder.y = placeholderY;
-        //   this.placeholder.w = placeholderW;
-        //   this.placeholder.h = placeholderH;
-        //   this.$nextTick(function () {
-        //     this.isDragging = true;
-        //   });
-        // } else if (eventName === 'dragend') {
-        //     console.log('dragend');
-        //   this.$nextTick(function () {
-        //     this.isDragging = false;
-        //   });
-        // }
-
-      },
       layoutUpdate () {
         if (this.layout !== undefined && this.originalLayout !== null) {
           if (this.layout.length !== this.originalLayout.length) {
@@ -380,15 +319,15 @@
         } else {
           this.$nextTick(function () {
             this.isDragging = false;
-            // let mousePlaceholder = getMousePlaceholder(this.layout, mousePos, id)
-            // const layout = dropElement(this.layout, l, mousePlaceholder);
-            // dropElement(this.layout, l, mousePlaceholder);
-            // this.$emit('update:layout', layout);
           });
+          let mousePlaceholder = getMousePlaceholder(this.layout, mousePos, id)
+          const layout = dropElement(this.layout, l, mousePlaceholder);
+        //   dropElement(this.layout, l, mousePlaceholder);
+          this.$emit('update:layout', layout);
         }
 
         this.layout = moveElement(this.layout, l, x, y, true, this.preventCollision);
-        // compact(this.layout, this.verticalCompact);
+        compact(this.layout, this.verticalCompact);
         this.eventBus.$emit("compact");
         this.updateHeight();
         if (eventName === 'dragend') {

@@ -54,7 +54,6 @@
             >
                 <grid-item v-for="item in layout" :key="item.i"
                            :static="item.static"
-                           :nativeDrag="false"
                            :x="item.x"
                            :y="item.y"
                            :w="item.w"
