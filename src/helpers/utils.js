@@ -642,132 +642,127 @@ export function findAndRemove(array, property, value) {
 }
 
 /**
+ * 交换l1,l2位置
+ */
+function exchangeLayout(layout, l1, l2) {
+  const l1Idx = layout.findIndex((item) => item.i === l1.i);
+  const l2Idx = layout.findIndex((item) => item.i === l2.i);
+  // let minX = Math.min(l1.x,l2.x);
+  // let maxX = Math.max(l1.x, l2.x);
+  // let newL1X
+  // let newL2X
+  layout[l1Idx] = { ...l1, x: l2.x, y: l2.y };
+  layout[l2Idx] = { ...l2, x: l1.x, y: l1.y };
+  return layout;
+}
+
+/**
  * 比较两个l的边是否完全重合
  */
 function borderFit(l1, l2) {
   if (l1 === l2) return false; // same element
   // border-top
-  if (l1.y === l2.y + l2.h && l1.w === l2.w && l1.x === l2.x) {
-    return "top";
-  }
+  if (l1.y === l2.y + l2.h && l1.w === l2.w && l1.x === l2.x) return true;
   // border-bottom
-  if (l1.y + l1.h === l2.y && l1.w === l2.w && l1.x === l2.x) {
-    return "bottom";
-  }
+  if (l1.y + l1.h === l2.y && l1.w === l2.w && l1.x === l2.x) return true;
   // border-left
-  if (l1.x === l2.x + l2.w && l1.h === l2.h && l1.y === l2.y) {
-    return "left";
-  }
+  if (l1.x === l2.x + l2.w && l1.h === l2.h && l1.y === l2.y) return true;
   // border-right
-  if (l1.x + l1.w === l2.x && l1.h === l2.h && l1.y === l2.y) {
-    return "right";
-  }
+  if (l1.x + l1.w === l2.x && l1.h === l2.h && l1.y === l2.y) return true;
 }
 
-/**
- * 交换l位置
- */
-function exchangeLayout(layout, l1, l2) {
-  const l1Idx = layout.findIndex((item) => item.i === l1.i);
-  const l2Idx = layout.findIndex((item) => item.i === l2.i);
-  const temp = l1;
-  layout[l1Idx] = { ...l2, w: l1.w, h: l1.h, x: l1.x, y: l1.y };
-  layout[l2Idx] = { ...temp, w: l2.w, h: l2.h, x: l2.x, y: l2.y };
-  return layout;
-}
-
-
-export function judgeDragPostion({ w, h, x, y, l }) {
+export function judgeDragPostion({ w, h, x, y, l, l1 }) {
   /**
    * @target 判断当前鼠标在drop块的哪个区域（大小形状完全一致上下左右中，不一致上下左右）
    * @desc1 当前四边形x,y方向各三等分分出上下左右四个梯形和中间一个四边形，坐标系在左下角 两条对角线y=(h/w)*x,y= h - (h/w)*x
    * @desc2 对角线切割，分成4个等腰三角形，坐标系在左下角 两条对角线y=(h/w)*x,y= h - (h/w)*x
    */
 
-  //完全一样 上下左右
-  if (w !== l.w || h !== l.h) {
-    if (y <= (h / w) * x) {
-      // 下、右
-      if (y >= h - (h / w) * x) {
-        return "right";
-      } else {
+  // 大小完全一样 || 相邻且边等长贴合
+  if ((w === l.w && h === l.h) || borderFit(l, l1)) {
+    // 上下左右中
+    // 左1/3区域
+    if (x < w / 3) {
+      if (y <= (h / w) * x) {
         return "bottom";
       }
-    } else {
       if (y >= h - (h / w) * x) {
         return "top";
-      } else {
-        return "left";
       }
+      return "left";
+    }
+    // 中1/3区域
+    if (x >= w / 3 && x <= (w * 2) / 3) {
+      if (y <= h / 3) {
+        return "bottom";
+      }
+      if (y >= (h * 2) / 3) {
+        return "top";
+      }
+      return "center";
+    }
+
+    // 右1/3区域
+    if (x > (w * 2) / 3) {
+      if (y >= (h / w) * x) {
+        return "top";
+      }
+      if (y <= h - (h / w) * x) {
+        return "bottom";
+      }
+      return "right";
     }
   }
 
-  // 上下左右中
-  // 左1/3区域
-  if (x < w / 3) {
-    if (y <= (h / w) * x) {
+  //大小不一样 上下左右
+  if (y <= (h / w) * x) {
+    // 下、右
+    if (y >= h - (h / w) * x) {
+      return "right";
+    } else {
       return "bottom";
     }
+  } else {
     if (y >= h - (h / w) * x) {
       return "top";
+    } else {
+      return "left";
     }
-    return "left";
-  }
-  // 中1/3区域
-  if (x >= w / 3 && x <= (w * 2) / 3) {
-    if (y <= h / 3) {
-      return "bottom";
-    }
-    if (y >= (h * 2) / 3) {
-      return "top";
-    }
-    return "center";
-  }
-
-  // 右1/3区域
-  if (x > (w * 2) / 3) {
-    if (y >= (h / w) * x) {
-      return "top";
-    }
-    if (y <= h - (h / w) * x) {
-      return "bottom";
-    }
-    return "right";
   }
 }
 
-function getPlaceholderPostion(pos, item) {
+function getPlaceholderPostion(pos, dropItem) {
   let x, y, w, h;
   switch (pos) {
     case "center":
-      x = item.x;
-      y = item.y;
-      w = item.w;
-      h = item.h;
+      x = dropItem.x;
+      y = dropItem.y;
+      w = dropItem.w;
+      h = dropItem.h;
       break;
     case "top":
-      x = item.x;
-      y = item.y;
-      w = item.w;
-      h = item.h / 2;
+      x = dropItem.x;
+      y = dropItem.y;
+      w = dropItem.w;
+      h = dropItem.h / 2;
       break;
     case "bottom":
-      x = item.x;
-      y = item.y + item.h / 2;
-      w = item.w;
-      h = item.h / 2;
+      x = dropItem.x;
+      y = dropItem.y + dropItem.h / 2;
+      w = dropItem.w;
+      h = dropItem.h / 2;
       break;
     case "left":
-      x = item.x;
-      y = item.y;
-      w = item.w / 2;
-      h = item.h;
+      x = dropItem.x;
+      y = dropItem.y;
+      w = dropItem.w / 2;
+      h = dropItem.h;
       break;
     case "right":
-      x = item.x + item.w / 2;
-      y = item.y;
-      w = item.w / 2;
-      h = item.h;
+      x = dropItem.x + dropItem.w / 2;
+      y = dropItem.y;
+      w = dropItem.w / 2;
+      h = dropItem.h;
       break;
     default:
       return undefined;
@@ -777,8 +772,8 @@ function getPlaceholderPostion(pos, item) {
     y,
     w,
     h,
-    i: item.i,
-    dropItem: item,
+    i: dropItem.i,
+    dropItem,
     pos,
   };
 }
@@ -791,9 +786,10 @@ function handlerBoundaryContions(pos, w, h) {
   } else if (h > 1 && w < 2) {
     if (!["left", "right"].includes(pos)) return pos;
   } else {
-    if (pos === 'center') return pos;
+    if (pos === "center") return pos;
   }
 }
+
 export function getMousePlaceholder(layout, mousePos, l) {
   for (let idx = 0, len = layout.length; idx < len; idx++) {
     let { x, y, w, h, i } = layout[idx];
@@ -808,6 +804,7 @@ export function getMousePlaceholder(layout, mousePos, l) {
           x: delX,
           y: delY,
           l,
+          l1: layout[idx],
         });
         return getPlaceholderPostion(
           handlerBoundaryContions(pos, w, h),
@@ -820,21 +817,110 @@ export function getMousePlaceholder(layout, mousePos, l) {
   }
 }
 
-// 获取和当前块边完全对齐的块(中的最小面积块)
-export function getAlignItem(layout, l) {
-  // borderFit
-  let items = [];
-  for (let idx = 0, len = layout.length; idx < len; idx++) {
-    const pos = borderFit(l, layout[idx]);
-    if (pos) {
-      items.push({
-        pos,
-        item: layout[idx],
-        area: layout[idx].w * layout[idx].h,
-      });
+// 获取和当前块边完全对齐的块，可能是一个也可以是多个
+// TODO寻找最小面积块-复杂度高暂不做
+function getAlignItems(layout, l) {
+  // l（当前移动中的块）的边
+  const borders = ["bottom", "top", "left", "right"];
+  let resItems = [];
+  for (let index = 0, len = borders.length; index < len; index++) {
+    const type = borders[index];
+    if (type === "bottom") {
+      resItems = layout
+        .filter(
+          (item) =>
+            item.y === l.y + l.h &&
+            item.x >= l.x &&
+            item.x + item.w <= l.x + l.w
+        )
+        .sort((a, b) => a.x - b.x);
+      if (resItems.length) {
+        const firstItem = resItems[0];
+        const lastItem = resItems[resItems.length - 1];
+        if (firstItem.x === l.x && lastItem.x + lastItem.w === l.x + l.w) {
+          resItems = resItems.map((item) => ({
+            i: item.i,
+            y: -1 * l.h,
+            h: l.h,
+          }));
+          break;
+        }
+      }
+    }
+    if (type === "top") {
+      resItems = layout
+        .filter(
+          (item) =>
+            l.y === item.y + item.h &&
+            item.x >= l.x &&
+            item.x + item.w <= l.x + l.w
+        )
+        .sort((a, b) => a.x - b.x);
+      if (resItems.length) {
+        const firstItem = resItems[0];
+        const lastItem = resItems[resItems.length - 1];
+        if (firstItem.x === l.x && lastItem.x + lastItem.w === l.x + l.w) {
+          resItems = resItems.map((item) => ({ i: item.i, h: l.h }));
+          break;
+        }
+      }
+    }
+    if (type === "left") {
+      resItems = layout
+        .filter(
+          (item) =>
+            l.x === item.x + item.w &&
+            item.y >= l.y &&
+            item.y + item.h <= l.y + l.h
+        )
+        .sort((a, b) => a.y - b.y);
+      if (resItems.length) {
+        const firstItem = resItems[0];
+        const lastItem = resItems[resItems.length - 1];
+        if (firstItem.y === l.y && lastItem.y + lastItem.h === l.y + l.h) {
+          resItems = resItems.map((item) => ({ i: item.i, w: l.w }));
+          break;
+        }
+      }
+    }
+    if (type === "right") {
+      resItems = layout
+        .filter(
+          (item) =>
+            item.x === l.x + l.w &&
+            item.y >= l.y &&
+            item.y + item.h <= l.y + l.h
+        )
+        .sort((a, b) => a.y - b.y);
+      if (resItems.length) {
+        const firstItem = resItems[0];
+        const lastItem = resItems[resItems.length - 1];
+        if (firstItem.y === l.y && lastItem.y + lastItem.h === l.y + l.h) {
+          resItems = resItems.map((item) => ({
+            i: item.i,
+            x: -1 * l.x,
+            w: l.w,
+          }));
+          break;
+        }
+      }
     }
   }
-  return items.sort((a, b) => a.area - b.area)[0];
+  return resItems;
+}
+
+// fillGap
+function fillGap(layout, changeList) {
+  changeList.map(({ i, x = 0, y = 0, h = 0, w = 0 } = {}) => {
+    const index = layout.findIndex((l) => l.i === i);
+    layout[index] = {
+      ...layout[index],
+      x: layout[index].x + x,
+      y: layout[index].y + y,
+      w: layout[index].w + w,
+      h: layout[index].h || h,
+    };
+  });
 }
 
 // dropElement
@@ -846,92 +932,11 @@ export function dropElement(layout, l, mousePlaceholder) {
       // 换位
       exchangeLayout(copyLayout, l, mousePlaceholder.dropItem);
       break;
-
     default:
+      // left、right、top、bottom
+      // 贴合块填补空位
+      // fillGap(copyLayout, getAlignItems(layout, l));
       break;
   }
-  // // 最小贴合块填补空位
-  // const { pos, item: alignItem } = getAlignItem(layout, l);
-  // console.log(pos, alignItem);
-  // const index = copyLayout.findIndex((item) => item.i === alignItem.i);
-  // switch (pos) {
-  //   case "top":
-  //     copyLayout[index].h += alignItem.h;
-  //     break;
-  //   case "bottom":
-  //     copyLayout[index].h += alignItem.h;
-  //     copyLayout[index].y -= alignItem.h;
-  //     break;
-  //   case "left":
-  //     copyLayout[index].w += alignItem.w;
-  //     break;
-  //   case "right":
-  //     copyLayout[index].w += alignItem.w;
-  //     copyLayout[index].x -= alignItem.w;
-  //     break;
-  // }
-
-  // drop块和drag块合并或者换位 TODO cpu100%
-  // const dropIndex = copyLayout.findIndex((item) => item.i === mousePlaceholder.i); // drop
-  // const dragIndex = l.i; // drag
-  // const { x: dropX, y: dropY, h: dropH, w: dropW } = copyLayout[dropIndex];
-  // switch (mousePlaceholder.pos) {
-  //   case "top":
-  //     copyLayout[dragIndex] = {
-  //       ...copyLayout[dragIndex],
-  //       x: dropX,
-  //       y: dropY,
-  //       w: dropW,
-  //       h: dropH / 2,
-  //     };
-  //     copyLayout[dropIndex] = {
-  //       ...copyLayout[dropIndex],
-  //       y: dropY + dropH / 2,
-  //       h: dropH / 2,
-  //     };
-  //     break;
-  //   case "bottom":
-  //     copyLayout[dragIndex] = {
-  //       ...copyLayout[dragIndex],
-  //       x: dropX,
-  //       y: dropY + dropH / 2,
-  //       w: dropW,
-  //       h: dropH / 2,
-  //     };
-  //     copyLayout[dropIndex] = {
-  //       ...copyLayout[dropIndex],
-  //       h: dropH / 2,
-  //     };
-  //     break;
-  //   case "left":
-  //     copyLayout[dragIndex] = {
-  //       ...copyLayout[dragIndex],
-  //       x: dropX,
-  //       y: dropY,
-  //       h: dropH,
-  //       w: dropW / 2,
-  //     };
-  //     copyLayout[dropIndex] = {
-  //       ...copyLayout[dropIndex],
-  //       x: dropX - dropW / 2,
-  //       w: dropW / 2,
-  //     };
-  //     break;
-  //   case "right":
-  //     copyLayout[dragIndex] = {
-  //       ...copyLayout[dragIndex],
-  //       x: dropX - dropW / 2,
-  //       y: dropY,
-  //       h: dropH,
-  //       w: dropW / 2,
-  //     };
-  //     copyLayout[dropIndex] = {
-  //       w: dropW / 2,
-  //     };
-  //     break;
-  //   case "center":
-  //     copyLayout[index].w += alignItem.w;
-  //     break;
-  // }
   return copyLayout;
 }

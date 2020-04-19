@@ -294,8 +294,6 @@
           l = { x: 0, y: 0 }
         }
 
-
-
         if (eventName === "dragmove" || eventName === "dragstart") {
           this.placeholder.i = id;
           this.placeholder.x = l.x;
@@ -325,13 +323,13 @@
           this.$emit('update:layout', layout);
         }
 
-        this.layout = moveElement(this.layout, l, x, y, true, this.preventCollision);
-        compact(this.layout, this.verticalCompact);
-        this.eventBus.$emit("compact");
-        this.updateHeight();
-        if (eventName === 'dragend') {
-          this.$emit('layout-updated', this.layout);
-        }
+        // this.layout = moveElement(this.layout, l, x, y, true, this.preventCollision);
+        // compact(this.layout, this.verticalCompact);
+        // this.eventBus.$emit("compact");
+        // this.updateHeight();
+        // if (eventName === 'dragend') {
+        //   this.$emit('layout-updated', this.layout);
+        // }
       },
       resizeEvent: function (eventName, id, x, y, h, w) {
         let l = getLayoutItem(this.layout, id);
