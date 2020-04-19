@@ -665,42 +665,43 @@ function exchangeLayout(layout, l1, l2) {
 function SplitDropItem(layout, l1, l2, pos) {
   const l1Idx = layout.findIndex((item) => item.i === l1.i);
   const l2Idx = layout.findIndex((item) => item.i === l2.i);
-  // 水平方向大小不同的换位
+  const { x, y, w, h } = l2;
+  const centerX = x + w / 2;
+  const centerY = y + h / 2;
   switch (pos) {
     case "top":
-      layout[l1Idx] = { ...l2, x: l2.x, y: l2.y, w: l2.w, h: l2.h / 2 };
-      layout[l2Idx] = { ...l1, y: l2.y + l2.h / 2, h: l2.h / 2 };
-      console.log(layout[l1Idx], { x: l2.x, y: l2.y, w: l2.w, h: l2.h / 2 });
+      layout[l1Idx] = { ...l1, x, y, w, h: h / 2 };
+      layout[l2Idx] = { ...l2, y: centerY, h: h / 2 };
       break;
     case "bottom":
       layout[l1Idx] = {
-        ...l2,
-        x: l2.x,
-        y: l2.y + l2.h / 2,
-        w: l2.w,
-        h: l2.h / 2,
+        ...l1,
+        x,
+        y: centerY,
+        w,
+        h: h / 2,
       };
-      layout[l2Idx] = { ...l1, h: l2.h / 2 };
+      layout[l2Idx] = { ...l2, h: h / 2 };
       break;
     case "left":
       layout[l1Idx] = {
-        ...l2,
-        x: l2.x,
-        y: l2.y,
-        w: l2.w / 2,
-        h: l2.h,
+        ...l1,
+        x,
+        y,
+        w: w / 2,
+        h,
       };
-      layout[l2Idx] = { ...l1, w: l2.w / 2, x: l2.x + l2.w / 2 };
+      layout[l2Idx] = { ...l2, w: w / 2, x: centerX };
       break;
     case "right":
       layout[l1Idx] = {
-        ...l2,
-        x: l2.x + l2.w / 2,
-        y: l2.y,
-        w: l2.w / 2,
-        h: l2.h,
+        ...l1,
+        x: centerX,
+        y,
+        w: w / 2,
+        h
       };
-      layout[l2Idx] = { ...l2, w: l2.w / 2 };
+      layout[l2Idx] = { ...l2, w: w / 2 };
       break;
   }
   return layout;
@@ -948,7 +949,7 @@ function getAlignItems(layout, l) {
         if (firstItem.y === l.y && lastItem.y + lastItem.h === l.y + l.h) {
           resItems = resItems.map((item) => ({
             i: item.i,
-            x: -1 * l.x,
+            x: -1 * l.w,
             w: l.w,
           }));
           break;
@@ -961,6 +962,7 @@ function getAlignItems(layout, l) {
 
 // fillGap
 function fillGap(layout, changeList) {
+  console.log(changeList);
   changeList.map(({ i, x = 0, y = 0, h = 0, w = 0 } = {}) => {
     const index = layout.findIndex((l) => l.i === i);
     layout[index] = {
@@ -985,7 +987,6 @@ export function dropElement(layout, l, mousePlaceholder) {
     default:
       // left、right、top、bottom
       // 贴合块填补空位
-      // console.log(getAlignItems(layout, l));
       fillGap(copyLayout, getAlignItems(layout, l));
       SplitDropItem(
         copyLayout,
