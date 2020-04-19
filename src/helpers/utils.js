@@ -131,7 +131,7 @@ export function compactItem(
   if (verticalCompact) {
     // Move the element up as far as it can go without colliding.
     while (l.y > 0 && !getFirstCollision(compareWith, l)) {
-      l.y--;
+      l.y < 1 ? (l.y = 0) : l.y--;
     }
   }
 
