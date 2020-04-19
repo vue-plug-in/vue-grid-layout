@@ -670,7 +670,7 @@ function SplitDropItem(layout, l1, l2, pos) {
     case "top":
       layout[l1Idx] = { ...l2, x: l2.x, y: l2.y, w: l2.w, h: l2.h / 2 };
       layout[l2Idx] = { ...l1, y: l2.y + l2.h / 2, h: l2.h / 2 };
-      console.log(layout[l1Idx], layout[l2Idx]);
+      console.log(layout[l1Idx], { x: l2.x, y: l2.y, w: l2.w, h: l2.h / 2 });
       break;
     case "bottom":
       layout[l1Idx] = {
