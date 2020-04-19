@@ -661,6 +661,7 @@ function exchangeLayout(layout, l1, l2) {
 /**
  * dragItem拖拽后上下左右平分dropItem
  * l1(dragItem),l2(dropItem)
+ * TODO w,h为奇数如3 5 7等特殊处理
  */
 function SplitDropItem(layout, l1, l2, pos) {
   const l1Idx = layout.findIndex((item) => item.i === l1.i);
@@ -699,7 +700,7 @@ function SplitDropItem(layout, l1, l2, pos) {
         x: centerX,
         y,
         w: w / 2,
-        h
+        h,
       };
       layout[l2Idx] = { ...l2, w: w / 2 };
       break;
@@ -877,7 +878,7 @@ function getAlignItems(layout, l) {
   for (let index = 0, len = borders.length; index < len; index++) {
     const type = borders[index];
     if (type === "bottom") {
-      resItems = layout
+      const items = layout
         .filter(
           (item) =>
             item.y === l.y + l.h &&
@@ -885,11 +886,11 @@ function getAlignItems(layout, l) {
             item.x + item.w <= l.x + l.w
         )
         .sort((a, b) => a.x - b.x);
-      if (resItems.length) {
-        const firstItem = resItems[0];
-        const lastItem = resItems[resItems.length - 1];
+      if (items.length) {
+        const firstItem = items[0];
+        const lastItem = items[items.length - 1];
         if (firstItem.x === l.x && lastItem.x + lastItem.w === l.x + l.w) {
-          resItems = resItems.map((item) => ({
+          resItems = items.map((item) => ({
             i: item.i,
             y: -1 * l.h,
             h: l.h,
@@ -899,7 +900,7 @@ function getAlignItems(layout, l) {
       }
     }
     if (type === "top") {
-      resItems = layout
+      const items = layout
         .filter(
           (item) =>
             l.y === item.y + item.h &&
@@ -907,17 +908,17 @@ function getAlignItems(layout, l) {
             item.x + item.w <= l.x + l.w
         )
         .sort((a, b) => a.x - b.x);
-      if (resItems.length) {
-        const firstItem = resItems[0];
-        const lastItem = resItems[resItems.length - 1];
+      if (items.length) {
+        const firstItem = items[0];
+        const lastItem = items[items.length - 1];
         if (firstItem.x === l.x && lastItem.x + lastItem.w === l.x + l.w) {
-          resItems = resItems.map((item) => ({ i: item.i, h: l.h }));
+          resItems = items.map((item) => ({ i: item.i, h: l.h }));
           break;
         }
       }
     }
     if (type === "left") {
-      resItems = layout
+      const items = layout
         .filter(
           (item) =>
             l.x === item.x + item.w &&
@@ -925,17 +926,17 @@ function getAlignItems(layout, l) {
             item.y + item.h <= l.y + l.h
         )
         .sort((a, b) => a.y - b.y);
-      if (resItems.length) {
-        const firstItem = resItems[0];
-        const lastItem = resItems[resItems.length - 1];
+      if (items.length) {
+        const firstItem = items[0];
+        const lastItem = items[items.length - 1];
         if (firstItem.y === l.y && lastItem.y + lastItem.h === l.y + l.h) {
-          resItems = resItems.map((item) => ({ i: item.i, w: l.w }));
+          resItems = items.map((item) => ({ i: item.i, w: l.w }));
           break;
         }
       }
     }
     if (type === "right") {
-      resItems = layout
+      const items = layout
         .filter(
           (item) =>
             item.x === l.x + l.w &&
@@ -943,11 +944,11 @@ function getAlignItems(layout, l) {
             item.y + item.h <= l.y + l.h
         )
         .sort((a, b) => a.y - b.y);
-      if (resItems.length) {
-        const firstItem = resItems[0];
-        const lastItem = resItems[resItems.length - 1];
+      if (items.length) {
+        const firstItem = items[0];
+        const lastItem = items[items.length - 1];
         if (firstItem.y === l.y && lastItem.y + lastItem.h === l.y + l.h) {
-          resItems = resItems.map((item) => ({
+          resItems = items.map((item) => ({
             i: item.i,
             x: -1 * l.w,
             w: l.w,
