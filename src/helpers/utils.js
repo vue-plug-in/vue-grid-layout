@@ -642,17 +642,67 @@ export function findAndRemove(array, property, value) {
 }
 
 /**
- * 交换l1,l2位置
+ * 交换l1(dragItem),l2(dropItem)位置
  */
 function exchangeLayout(layout, l1, l2) {
   const l1Idx = layout.findIndex((item) => item.i === l1.i);
   const l2Idx = layout.findIndex((item) => item.i === l2.i);
-  // let minX = Math.min(l1.x,l2.x);
-  // let maxX = Math.max(l1.x, l2.x);
-  // let newL1X
-  // let newL2X
-  layout[l1Idx] = { ...l1, x: l2.x, y: l2.y };
-  layout[l2Idx] = { ...l2, x: l1.x, y: l1.y };
+  // 水平方向大小不同的换位
+  if (l2.x > l1.x) {
+    layout[l1Idx] = { ...l1, x: l2.x + (l2.w - l1.w), y: l2.y };
+    layout[l2Idx] = { ...l2, x: l1.x, y: l1.y };
+  } else {
+    layout[l1Idx] = { ...l1, x: l2.x, y: l2.y };
+    layout[l2Idx] = { ...l2, x: l1.x + (l1.w - l2.w), y: l1.y };
+  }
+  return layout;
+}
+
+/**
+ * dragItem拖拽后上下左右平分dropItem
+ * l1(dragItem),l2(dropItem)
+ */
+function SplitDropItem(layout, l1, l2, pos) {
+  const l1Idx = layout.findIndex((item) => item.i === l1.i);
+  const l2Idx = layout.findIndex((item) => item.i === l2.i);
+  // 水平方向大小不同的换位
+  switch (pos) {
+    case "top":
+      layout[l1Idx] = { ...l2, x: l2.x, y: l2.y, w: l2.w, h: l2.h / 2 };
+      layout[l2Idx] = { ...l1, y: l2.y + l2.h / 2, h: l2.h / 2 };
+      console.log(layout[l1Idx], layout[l2Idx]);
+      break;
+    case "bottom":
+      layout[l1Idx] = {
+        ...l2,
+        x: l2.x,
+        y: l2.y + l2.h / 2,
+        w: l2.w,
+        h: l2.h / 2,
+      };
+      layout[l2Idx] = { ...l1, h: l2.h / 2 };
+      break;
+    case "left":
+      layout[l1Idx] = {
+        ...l2,
+        x: l2.x,
+        y: l2.y,
+        w: l2.w / 2,
+        h: l2.h,
+      };
+      layout[l2Idx] = { ...l1, w: l2.w / 2, x: l2.x + l2.w / 2 };
+      break;
+    case "right":
+      layout[l1Idx] = {
+        ...l2,
+        x: l2.x + l2.w / 2,
+        y: l2.y,
+        w: l2.w / 2,
+        h: l2.h,
+      };
+      layout[l2Idx] = { ...l2, w: l2.w / 2 };
+      break;
+  }
   return layout;
 }
 
@@ -918,7 +968,7 @@ function fillGap(layout, changeList) {
       x: layout[index].x + x,
       y: layout[index].y + y,
       w: layout[index].w + w,
-      h: layout[index].h || h,
+      h: layout[index].h + h,
     };
   });
 }
@@ -935,7 +985,14 @@ export function dropElement(layout, l, mousePlaceholder) {
     default:
       // left、right、top、bottom
       // 贴合块填补空位
-      // fillGap(copyLayout, getAlignItems(layout, l));
+      // console.log(getAlignItems(layout, l));
+      fillGap(copyLayout, getAlignItems(layout, l));
+      SplitDropItem(
+        copyLayout,
+        l,
+        mousePlaceholder.dropItem,
+        mousePlaceholder.pos
+      );
       break;
   }
   return copyLayout;
